@@ -12,6 +12,7 @@ the output from sequence basecalling.
 \itemize{
 \item \href{#method-basecalled_folder-new}{\code{basecalled_folder$new()}}
 \item \href{#method-basecalled_folder-print}{\code{basecalled_folder$print()}}
+\item \href{#method-basecalled_folder-index}{\code{basecalled_folder$index()}}
 \item \href{#method-basecalled_folder-clone}{\code{basecalled_folder$clone()}}
 }
 }
@@ -22,7 +23,7 @@ the output from sequence basecalling.
 constructor to initialise an instance of the basecalled_folder
 class
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$new(seq_path)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$new(seq_path, use_unclassified = private$.use_unclassified)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -30,6 +31,11 @@ class
 \describe{
 \item{\code{seq_path}}{\itemize{
 \item the sequence path to investigate
+}}
+
+\item{\code{use_unclassified}}{\itemize{
+\item when using demultiplexed datasets, include
+the unclassified sequences as a valid "barcode"
 }}
 }
 \if{html}{\out{</div>}}
@@ -55,9 +61,28 @@ and to provide better \code{rtqc} abstraction
 }
 \subsection{Returns}{
 nothing (at present) - output to stdout
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-index"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-index}{}}}
+\subsection{Method \code{index()}}{
+the index method will index the available sequence files to recover
+an object that is not entirely dissimilar to the original
+sequencing_summary file that was produced by the guppy software
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$index(threads = 2)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{threads}}{the number of threads to run in parallel
 evaluates the defined private$seq_path for sequence files that are the
 result of a base calling analysis using either MinKNOW or Dorado. This
-method will support FASTQ, SAM and BAM file formats.
+method will support FASTQ, SAM and BAM file formats.}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

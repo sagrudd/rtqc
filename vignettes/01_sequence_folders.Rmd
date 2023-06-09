@@ -32,4 +32,15 @@ bf <- basecalled_folder$new(dorado_fastq_path)
 print(bf)
 ```
 
+We can also process demultiplexed sequence collections
+
+```{r load_multiplexed}
+library(rtqc)
+
+dorado_fastq_path <- get_bundled_path("barcoded_pass")
+bf <- basecalled_folder$new(dorado_fastq_path)
+print(bf)
+
+bf$index()
+```
 
