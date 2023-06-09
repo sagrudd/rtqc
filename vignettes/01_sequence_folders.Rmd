@@ -1,0 +1,35 @@
+---
+title: "Handling folders of base called sequence output"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Preamble
+
+This `base called sequence` vignette introduces how the sequence data prepared
+by MinKNOW or Dorado may be processed in a simplified manner.
+
+## Getting started with the canned dataset
+
+The `rtqc` package is distributed with some simplified data.
+
+```{r load_rtqc}
+library(rtqc)
+
+dorado_fastq_path <- get_bundled_path("fastq_pass")
+bf <- basecalled_folder$new(dorado_fastq_path)
+print(bf)
+```
+
+
