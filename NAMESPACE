@@ -2,6 +2,6 @@
 
 export(basecalled_folder)
 export(get_bundled_path)
-export(hello_world)
+export(sequence_set)
 import(R6)
 useDynLib(rtqc, .registration = TRUE)

@@ -9,3 +9,9 @@ name = 'rtqc'
 
 [dependencies]
 extendr-api = '*'
+#fastq = { git = "https://github.com/sagrudd/fastq-rs.git" }
+#fastq = '0.6.0'
+fastq = { path = "/Users/stephen.rudd/Documents/github_sagrudd/fastq-rs/" }
+polars = {version = '0.30.0', features = ["polars-io"] }
+polars-io = { version = "0.30.0", features = ["parquet"] }
+chrono = '0.4.26'

@@ -11,9 +11,7 @@
 #' @useDynLib rtqc, .registration = TRUE
 NULL
 
-#' Return string `"Hello world!"` to R.
-#' @export
-hello_world <- function() .Call(wrap__hello_world)
+index_fastq <- function(fq_path) .Call(wrap__index_fastq, fq_path)
 
 
 # nolint end
