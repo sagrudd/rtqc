@@ -14,4 +14,4 @@ extendr-api = '*'
 fastq = { path = "/Users/stephen.rudd/Documents/github_sagrudd/fastq-rs/" }
 polars = {version = '0.30.0', features = ["polars-io"] }
 polars-io = { version = "0.30.0", features = ["parquet"] }
-chrono = '0.4.26'
+temp_file_name = '0.1.0'

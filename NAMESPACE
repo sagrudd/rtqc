@@ -2,6 +2,7 @@
 
 export(basecalled_folder)
 export(get_bundled_path)
+export(index_fastq)
 export(sequence_set)
 import(R6)
 useDynLib(rtqc, .registration = TRUE)

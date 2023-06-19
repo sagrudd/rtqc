@@ -11,7 +11,9 @@
 #' @useDynLib rtqc, .registration = TRUE
 NULL
 
-index_fastq <- function(fq_path) .Call(wrap__index_fastq, fq_path)
+#' perform an index of fastq entry metadata
+#' @export
+index_fastq <- function(fq_path, dir) .Call(wrap__index_fastq, fq_path, dir)
 
 
 # nolint end

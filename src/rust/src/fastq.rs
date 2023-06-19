@@ -6,11 +6,13 @@ use std::fmt;
 use std::fs::File;
 use std::path::Path;
 use std::str;
+use std::path::PathBuf;
+use temp_file_name::{self, TempFilePath};
 
-pub fn index_fastq(fq_path: &str) -> Option<&str> {
+pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Option<String> {
     println!("indexing fastq [{}]", fq_path);
 
-    let dest = "/tmp/df.parquet";
+    let mut dest = PathBuf::from(dir);
     let mut written = false;
 
     // check that fastq specified exists
@@ -38,15 +40,13 @@ pub fn index_fastq(fq_path: &str) -> Option<&str> {
                 })
                 .expect("Invalid fastq file");
 
-            //println!("{}", results.iter().sum::<usize>());
-
-            //let new_df = DataFrame::concat(results).unwrap();
 
             let mut dg2 = DataFrame::default();
             for x in results {
                 dg2.vstack_mut(&x).expect("Error merging fastq blocks");
             }
 
+            dest = PathBuf::from(dir).join(fq_path.temp_filename("parquet"));
             let mut file = File::create(&dest).expect("could not create file");
             ParquetWriter::new(&mut file)
                 .finish(&mut dg2)
@@ -57,7 +57,7 @@ pub fn index_fastq(fq_path: &str) -> Option<&str> {
     }
 
     if written {
-        return Some(&dest);
+        return dest.to_str().map(String::from);
     } else {
         return None;
     }

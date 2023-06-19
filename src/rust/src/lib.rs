@@ -2,9 +2,12 @@ use extendr_api::prelude::*;
 
 mod fastq;
 
+
+/// perform an index of fastq entry metadata
+/// @export
 #[extendr]
-fn index_fastq(fq_path: &str) -> extendr_api::Robj {
-    let index = fastq::index_fastq(fq_path);
+fn index_fastq(fq_path: &str, dir: &str) -> extendr_api::Robj {
+    let index = fastq::index_fastq(fq_path, dir);
 
     match index {
         Some(index) => return r!(Some(index)),
