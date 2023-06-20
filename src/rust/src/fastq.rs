@@ -9,15 +9,19 @@ use std::str;
 use std::path::PathBuf;
 use temp_file_name::{self, TempFilePath};
 
-pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Option<String> {
-    println!("indexing fastq [{}]", fq_path);
+
+pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<String, String> {
+    let path = Path::new(fq_path);
+    println!("indexing fastq [{}]", path.file_name().unwrap().to_str().unwrap());
 
     let mut dest = PathBuf::from(dir);
     let mut written = false;
 
     // check that fastq specified exists
     if !Path::new(fq_path).exists() {
-        eprintln!("file [{}] not found", fq_path);
+        let estr = format!("file [{}] not found", fq_path);
+        eprintln!("{}", estr.as_str());
+        return Err::<String, String>(estr);
     } else {
         parse_path(Some(fq_path), |parser| {
             let nthreads = 1;
@@ -57,9 +61,9 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Option<String> {
     }
 
     if written {
-        return dest.to_str().map(String::from);
+        return Ok(dest.to_str().map(String::from).unwrap());
     } else {
-        return None;
+        return Err(String::from("something not quite right"));
     }
 
     //let rfc3339 = DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00")?;

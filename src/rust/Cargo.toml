@@ -15,3 +15,4 @@ fastq = { path = "/Users/stephen.rudd/Documents/github_sagrudd/fastq-rs/" }
 polars = {version = '0.30.0', features = ["polars-io"] }
 polars-io = { version = "0.30.0", features = ["parquet"] }
 temp_file_name = '0.1.0'
+async-std = '1.12.0'

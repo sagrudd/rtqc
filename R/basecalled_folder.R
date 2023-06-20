@@ -52,7 +52,7 @@ basecalled_folder <- R6::R6Class(
     #'
     #' @param threads the number of threads to run in parallel
     index = function(threads = 2) {
-      print(private$.file_list)
+      index_fastq_list(file.path(private$seq_path, private$.file_list), tempdir(), threads)
     }
   ),
 
@@ -71,7 +71,7 @@ basecalled_folder <- R6::R6Class(
     #' result of a base calling analysis using either MinKNOW or Dorado. This
     #' method will support FASTQ, SAM and BAM file formats.
     sequence_scan = function() {
-      private$.file_list <- list.files(dorado_fastq_path,
+      private$.file_list <- list.files(private$seq_path,
                           recursive = TRUE,
                           pattern = "fq$|fq.gz$|fastq$|fastq.gz$",
                           ignore.case = TRUE)
