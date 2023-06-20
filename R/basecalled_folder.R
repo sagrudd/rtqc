@@ -52,7 +52,7 @@ basecalled_folder <- R6::R6Class(
     #'
     #' @param threads the number of threads to run in parallel
     index = function(threads = 2) {
-      index_fastq_list(file.path(private$seq_path, private$.file_list), tempdir(), threads)
+      parquet <- index_fastq_list(file.path(private$seq_path, private$.file_list), tempdir(), threads)
     }
   ),
 

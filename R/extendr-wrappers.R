@@ -17,7 +17,7 @@ index_fastq <- function(fq_path, dir) .Call(wrap__index_fastq, fq_path, dir)
 
 #' perform an index of multiple fastq entry metadata
 #' @export
-index_fastq_list <- function(file_list, dir, threads) invisible(.Call(wrap__index_fastq_list, file_list, dir, threads))
+index_fastq_list <- function(file_list, dir, threads) .Call(wrap__index_fastq_list, file_list, dir, threads)
 
 
 # nolint end
