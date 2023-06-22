@@ -1,4 +1,4 @@
-# rextendr::document()
+rextendr::document()
 
 
 dorado_fastq_path <- rtqc::get_bundled_path("fastq_pass")
@@ -14,3 +14,4 @@ bf$status()
 bf$status()
 
 seqset <- bf$as_sequence_set()
+seqset$sync()

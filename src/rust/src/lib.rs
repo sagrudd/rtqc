@@ -2,7 +2,8 @@ use extendr_api::prelude::*;
 
 mod fastq;
 mod fq_threaded;
-
+mod filehandlers;
+mod arrow;
 
 /// perform an index of fastq entry metadata
 /// @export
@@ -46,6 +47,8 @@ fn index_fastq_list(file_list: &[Rstr], dir: &str, threads: u8) -> extendr_api::
 #[extendr]
 fn form_arrow(dir: &str) -> extendr_api::Robj {
 
+  arrow::prepare_arrow(dir);
+
   let mut collapsed_results: Vec<String> = Vec::new();
 
   return r!(collapsed_results);
@@ -60,4 +63,5 @@ extendr_module! {
     mod rtqc;
     fn index_fastq;
     fn index_fastq_list;
+    fn form_arrow;
 }

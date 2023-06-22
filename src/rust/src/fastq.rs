@@ -10,8 +10,10 @@ use std::path::PathBuf;
 use temp_file_name::{self, TempFilePath};
 use extendr_api::{rprintln, print_r_output};
 use std::thread;
-use file_lock::{FileLock, FileOptions};
-use std::io::prelude::*;
+use crate::filehandlers::register_fq_index_pair;
+
+
+pub static FASTQ_PARQUET_LOG: &str = "fq_index_pair.txt";
 
 
 pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), String> {
@@ -108,27 +110,6 @@ fn hack_fastq(record: RefRecord<'_>) -> FastqEntry {
 
         ..Default::default()
     };
-}
-
-
-fn register_fq_index_pair(dir: &str, src: &str, idx: &str) {
-    let should_we_block  = true;
-    let options = FileOptions::new()
-                        .write(true)
-                        .create(true)
-                        .append(true);
-
-    let fq_index_log = Path::new(dir).join("fq_index_pair.txt");
-
-    let mut filelock = match FileLock::lock(fq_index_log, should_we_block, options) {
-        Ok(lock) => lock,
-        Err(err) => panic!("Error getting write lock: {}", err),
-    };
-
-    let str = format!("{},{}\n", src, idx);
-
-    let _ = filelock.file.write_all(str.as_bytes()).is_ok();
-    let _ = filelock.unlock();
 }
 
 
