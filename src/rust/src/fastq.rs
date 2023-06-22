@@ -8,11 +8,13 @@ use std::path::Path;
 use std::str;
 use std::path::PathBuf;
 use temp_file_name::{self, TempFilePath};
+use extendr_api::{rprintln, print_r_output};
+use std::thread;
 
 
 pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<String, String> {
     let path = Path::new(fq_path);
-    println!("indexing fastq [{}]", path.file_name().unwrap().to_str().unwrap());
+    rprintln!("indexing fastq [{}] on thread {:?}", path.file_name().unwrap().to_str().unwrap(), thread::current().id());
 
     let mut dest = PathBuf::from(dir);
     let mut written = false;

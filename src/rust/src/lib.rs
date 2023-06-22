@@ -22,12 +22,8 @@ fn index_fastq(fq_path: &str, dir: &str) -> extendr_api::Robj {
 /// @export
 #[extendr]
 fn index_fastq_list(file_list: &[Rstr], dir: &str, threads: u8) -> extendr_api::Robj {
-
-  println!("requested threads {}", threads);
   let xlist: Vec<&str> = file_list.iter().map(|x: &Rstr| x.as_str()).collect();
-
-  let x = fq_threaded::index_fastq_list(xlist, dir);
-
+  let x = fq_threaded::index_fastq_list(xlist, dir, threads);
   return r!(x);
 }
 

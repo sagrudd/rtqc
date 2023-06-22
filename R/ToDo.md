@@ -12,7 +12,7 @@
   [ ] Implementation of dynamic filters to update view of sequence_set
 0.0.1 -
   [x] Ingress of FASTQ files (not barcoded)
-  [ ] Ingress implemented a background process
+  [x] Ingress implemented a background/parallel process
   [ ] Creation of sequence_set object
   [ ] Sequence_set object updated on a file-by-file ingress basis
     parquet format
