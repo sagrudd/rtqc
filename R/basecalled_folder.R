@@ -20,10 +20,14 @@ basecalled_folder <- R6::R6Class(
         #' @param seq_path - the sequence path to investigate
         #' @param use_unclassified - when using demultiplexed datasets, include
         #' the unclassified sequences as a valid "barcode"
+        #' @param cache_dir - where should intermediate files be stored; this
+        #' will utilise a temporary directory by default
     initialize = function(seq_path,
-                          use_unclassified = private$.use_unclassified) {
+                          use_unclassified = private$.use_unclassified,
+                          cache_dir = tempdir()) {
       private$.use_unclassified <- use_unclassified
       private$seq_path <- seq_path
+      private$cache_dir <- cache_dir
       private$sequence_scan()
     },
 
@@ -52,12 +56,31 @@ basecalled_folder <- R6::R6Class(
     #'
     #' @param threads the number of threads to run in parallel
     index = function(threads = 2) {
-      callr::r_bg(function(x,y,z)
-        rtqc::index_fastq_list(x,y,z),
-        args = list(file.path(private$seq_path, private$.file_list),
-                    tempdir(),
-                    threads)
-      )
+      if (private$check_indexing()) {
+        private$index_process <- callr::r_bg(
+          function(x, y, z) rtqc::index_fastq_list(x, y, z),
+          args = list(file.path(private$seq_path, private$.file_list),
+                      private$cache_dir,
+                      threads)
+
+        )
+      }
+    },
+
+    #' @description
+    #' prepares a `sequence_set` object from the current basecalled folder
+    as_sequence_set = function() {
+      return(rtqc::sequence_set$new(private$cache_dir))
+    },
+
+    #' @description
+    #' a public accessory method to check on what is happening with the
+    #' current `basecalled_folder`
+    status = function() {
+      # print some friendly information on the object ...
+
+      # what is the state of the indexing process
+      private$check_indexing(echo=TRUE)
     }
   ),
 
@@ -66,10 +89,12 @@ basecalled_folder <- R6::R6Class(
     .sample_sheet = NULL,
     .file_list = NULL,
     seq_path = NULL,
+    barcode_count = 0,
     barcoded = FALSE,
+    cache_dir = NULL,
     file_format = NULL,
     file_count = 0,
-    barcode_count = 0,
+    index_process = NULL,
     valid = FALSE,
 
     #' evaluates the defined private$seq_path for sequence files that are the
@@ -125,6 +150,20 @@ basecalled_folder <- R6::R6Class(
             }
           }
         }
+      }
+    },
+
+    check_indexing = function(echo=FALSE) {
+      if (is.null(private$index_process)) {
+        if (echo) cat(paste("Indexing process is not running", "\n"))
+        return(r <- TRUE)
+      } else if (private$index_process$is_alive()) {
+        if (echo) cat(paste("Indexing process is currently running", "\n"))
+        return(r <- FALSE)
+      } else if (!private$index_process$is_alive()) {
+        if (echo) cat(paste("Indexing process has completed", "\n"))
+        private$index_process <- NULL
+        return(r <- TRUE)
       }
     }
   )

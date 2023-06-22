@@ -10,9 +10,11 @@ use std::path::PathBuf;
 use temp_file_name::{self, TempFilePath};
 use extendr_api::{rprintln, print_r_output};
 use std::thread;
+use file_lock::{FileLock, FileOptions};
+use std::io::prelude::*;
 
 
-pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<String, String> {
+pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), String> {
     let path = Path::new(fq_path);
     rprintln!("indexing fastq [{}] on thread {:?}", path.file_name().unwrap().to_str().unwrap(), thread::current().id());
 
@@ -23,7 +25,7 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<String, String> {
     if !Path::new(fq_path).exists() {
         let estr = format!("file [{}] not found", fq_path);
         eprintln!("{}", estr.as_str());
-        return Err::<String, String>(estr);
+        return Err::<(String, String), String>(estr);
     } else {
         parse_path(Some(fq_path), |parser| {
             let nthreads = 1;
@@ -63,7 +65,11 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<String, String> {
     }
 
     if written {
-        return Ok(dest.to_str().map(String::from).unwrap());
+
+        register_fq_index_pair(dir, path.to_str().unwrap(), dest.to_str().unwrap());
+
+        return Ok((path.to_str().map(String::from).unwrap(),
+            dest.to_str().map(String::from).unwrap()));
     } else {
         return Err(String::from("something not quite right"));
     }
@@ -103,6 +109,28 @@ fn hack_fastq(record: RefRecord<'_>) -> FastqEntry {
         ..Default::default()
     };
 }
+
+
+fn register_fq_index_pair(dir: &str, src: &str, idx: &str) {
+    let should_we_block  = true;
+    let options = FileOptions::new()
+                        .write(true)
+                        .create(true)
+                        .append(true);
+
+    let fq_index_log = Path::new(dir).join("fq_index_pair.txt");
+
+    let mut filelock = match FileLock::lock(fq_index_log, should_we_block, options) {
+        Ok(lock) => lock,
+        Err(err) => panic!("Error getting write lock: {}", err),
+    };
+
+    let str = format!("{},{}\n", src, idx);
+
+    let _ = filelock.file.write_all(str.as_bytes()).is_ok();
+    let _ = filelock.unlock();
+}
+
 
 fn pick_feature_str(key: &str, meta: &HashMap<String, String>) -> Option<String> {
     let x = meta.get(key);

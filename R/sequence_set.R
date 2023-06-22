@@ -12,21 +12,32 @@ sequence_set <- R6::R6Class(
   classname = "sequence_set",
 
   public = list(
-    initialize = function() {
-
+    #' @description
+    #' Constructor method for `sequence_set` requires just a path to the
+    #' cache_directory that will be populated with parquet files that
+    #' summarise the sequence collection being processed
+    #'
+    #' @param cache_dir a fully qualified path to a cache directory
+    initialize = function(cache_dir) {
+      private$cache_dir <- cache_dir
     },
 
-    fastq_ingress = function(fastq_file) {
-
-    },
-
-    sam_bam_ingress = function(bam_file) {
-
+    #' @description
+    #' allowing for the real time generation of sequence data and accommodating
+    #' the background processing of indices, this method just pokes the system
+    #' to ensure that the latest changes within the `cache_dir` are understood
+    #' and that data held is up-to-date.
+    sync = function() {
+      private$get_arrow()
     }
   ),
 
   private = list(
+    cache_dir = NULL,
 
+    get_arrow = function() {
+      arrow <- form_arrow(private$cache_dir)
+    }
   )
 
 )

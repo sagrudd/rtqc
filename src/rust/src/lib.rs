@@ -12,7 +12,13 @@ fn index_fastq(fq_path: &str, dir: &str) -> extendr_api::Robj {
     let index = fastq::index_fastq(fq_path, dir);
 
     match index {
-        Ok(index) => return r!(Some(index)),
+        Ok(index) => {
+          let mut collapsed_results: Vec<String> = Vec::new();
+          let (src, parq) = index;
+          collapsed_results.push(String::from(src));
+          collapsed_results.push(String::from(parq));
+          return r!(collapsed_results)
+        },
         Err(_e) => return r!(NULL),
     }
 }
@@ -24,7 +30,26 @@ fn index_fastq(fq_path: &str, dir: &str) -> extendr_api::Robj {
 fn index_fastq_list(file_list: &[Rstr], dir: &str, threads: u8) -> extendr_api::Robj {
   let xlist: Vec<&str> = file_list.iter().map(|x: &Rstr| x.as_str()).collect();
   let x = fq_threaded::index_fastq_list(xlist, dir, threads);
-  return r!(x);
+
+  let mut collapsed_results: Vec<String> = Vec::new();
+  for i in x.iter() {
+    let (src, parq) = i;
+    collapsed_results.push(String::from(src));
+    collapsed_results.push(String::from(parq));
+  }
+  return r!(collapsed_results);
+}
+
+
+/// Prepare an arrow file from the parquet elements in current directory 
+/// @export
+#[extendr]
+fn form_arrow(dir: &str) -> extendr_api::Robj {
+
+  let mut collapsed_results: Vec<String> = Vec::new();
+
+  return r!(collapsed_results);
+
 }
 
 

@@ -6,14 +6,14 @@ use crate::fastq::index_fastq;
 
 // static ASYNC_STD_THREAD_COUNT: u32 = 4;
 
-async fn index_fastq_threaded(fastq_file_path: &str,  dir: &str) -> Result<String, String> {
+async fn index_fastq_threaded(fastq_file_path: &str,  dir: &str) -> Result<(String, String), String> {
     //rprintln!("Indexing fastq on thread {:?}", thread::current().id());
     return index_fastq(fastq_file_path, dir);
 }
 
 
 
-pub fn index_fastq_list(fastq_files: Vec<&str>, dir: &str, threads: u8) -> Vec<String> {
+pub fn index_fastq_list(fastq_files: Vec<&str>, dir: &str, threads: u8) -> Vec<(String, String)> {
 
     //env::set_var("ASYNC_STD_THREAD_COUNT", OsStr::new(ASYNC_STD_THREAD_COUNT.to_string().as_str()));
     env::set_var("ASYNC_STD_THREAD_COUNT", OsStr::new(threads.to_string().as_str()));
@@ -32,11 +32,11 @@ pub fn index_fastq_list(fastq_files: Vec<&str>, dir: &str, threads: u8) -> Vec<S
         tasks.push(handle);
     }
 
-    let mut indexing_results: Vec<String> = Vec::new();
+    let mut indexing_results: Vec<(String, String)> = Vec::new();
 
     task::block_on(async {
         for t in tasks {
-            let r: Result<String, String> = t.await;
+            let r: Result<(String, String), String> = t.await;
             match r {
                 Ok(body) => { 
                     indexing_results.push(body);

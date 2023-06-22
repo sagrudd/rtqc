@@ -13,6 +13,8 @@ the output from sequence basecalling.
 \item \href{#method-basecalled_folder-new}{\code{basecalled_folder$new()}}
 \item \href{#method-basecalled_folder-print}{\code{basecalled_folder$print()}}
 \item \href{#method-basecalled_folder-index}{\code{basecalled_folder$index()}}
+\item \href{#method-basecalled_folder-as_sequence_set}{\code{basecalled_folder$as_sequence_set()}}
+\item \href{#method-basecalled_folder-status}{\code{basecalled_folder$status()}}
 \item \href{#method-basecalled_folder-clone}{\code{basecalled_folder$clone()}}
 }
 }
@@ -23,7 +25,11 @@ the output from sequence basecalling.
 constructor to initialise an instance of the basecalled_folder
 class
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$new(seq_path, use_unclassified = private$.use_unclassified)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$new(
+  seq_path,
+  use_unclassified = private$.use_unclassified,
+  cache_dir = tempdir()
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -36,6 +42,11 @@ class
 \item{\code{use_unclassified}}{\itemize{
 \item when using demultiplexed datasets, include
 the unclassified sequences as a valid "barcode"
+}}
+
+\item{\code{cache_dir}}{\itemize{
+\item where should intermediate files be stored; this
+will utilise a temporary directory by default
 }}
 }
 \if{html}{\out{</div>}}
@@ -77,13 +88,34 @@ sequencing_summary file that was produced by the guppy software
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{threads}}{the number of threads to run in parallel
-evaluates the defined private$seq_path for sequence files that are the
-result of a base calling analysis using either MinKNOW or Dorado. This
-method will support FASTQ, SAM and BAM file formats.}
+\item{\code{threads}}{the number of threads to run in parallel}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-as_sequence_set"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-as_sequence_set}{}}}
+\subsection{Method \code{as_sequence_set()}}{
+prepares a \code{sequence_set} object from the current basecalled folder
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$as_sequence_set()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-status"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-status}{}}}
+\subsection{Method \code{status()}}{
+a public accessory method to check on what is happening with the
+current \code{basecalled_folder}
+evaluates the defined private$seq_path for sequence files that are the
+result of a base calling analysis using either MinKNOW or Dorado. This
+method will support FASTQ, SAM and BAM file formats.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$status()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-basecalled_folder-clone"></a>}}

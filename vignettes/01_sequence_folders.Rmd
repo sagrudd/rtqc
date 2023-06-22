@@ -48,7 +48,6 @@ print(bf)
 dorado_fastq_path <- get_bundled_path("fastq_pass")
 single_fastq <- file.path(
   dorado_fastq_path, list.files(dorado_fastq_path)[1])
-dorado_fastq_path <- get_bundled_path("fastq_pass")
 
 rtqc::index_fastq(single_fastq, tempdir())
 
