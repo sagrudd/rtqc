@@ -13,7 +13,7 @@
 0.0.1 -
   [x] Ingress of FASTQ files (not barcoded)
   [x] Ingress implemented a background/parallel process
-  [ ] Creation of sequence_set object
-  [ ] Sequence_set object updated on a file-by-file ingress basis
+  [x] Creation of sequence_set object
+  [x] Sequence_set object updated on a file-by-file ingress basis
     parquet format
   

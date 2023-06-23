@@ -80,7 +80,7 @@ basecalled_folder <- R6::R6Class(
       # print some friendly information on the object ...
 
       # what is the state of the indexing process
-      private$check_indexing(echo=TRUE)
+      private$check_indexing(echo = TRUE)
     }
   ),
 
@@ -153,7 +153,7 @@ basecalled_folder <- R6::R6Class(
       }
     },
 
-    check_indexing = function(echo=FALSE) {
+    check_indexing = function(echo = FALSE) {
       if (is.null(private$index_process)) {
         if (echo) cat(paste("Indexing process is not running", "\n"))
         return(r <- TRUE)

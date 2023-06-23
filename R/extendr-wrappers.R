@@ -21,7 +21,7 @@ index_fastq_list <- function(file_list, dir, threads) .Call(wrap__index_fastq_li
 
 #' Prepare an arrow file from the parquet elements in current directory 
 #' @export
-form_arrow <- function(dir) .Call(wrap__form_arrow, dir)
+form_arrow <- function(dir) invisible(.Call(wrap__form_arrow, dir))
 
 
 # nolint end
