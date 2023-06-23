@@ -5,6 +5,7 @@ use extendr_api::{rprintln, print_r_output};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+
 pub fn register_fq_index_pair(dir: &str, src: &str, idx: &str) {
     let fq_index_log = Path::new(dir).join(crate::fastq::FASTQ_PARQUET_LOG);
     let str = format!("{},{}\n", src, idx);
@@ -25,6 +26,11 @@ pub fn load_fq_index_pairs(dir: &str) -> HashMap<String, String> {
     return fastq_pairs;
 }
 
+pub fn register_parquet_merge(dir: &str, src: &str) {
+    let parquet_log = Path::new(dir).join(crate::arrow::ARROW_PARQUET_LOG);
+    let str = format!("{}\n", src);
+    file_append(parquet_log, str.as_bytes());
+}
 
 pub fn load_parquet_registrations(dir: &str) -> Vec<String> {
     let parquet_log = Path::new(dir).join(crate::arrow::ARROW_PARQUET_LOG);

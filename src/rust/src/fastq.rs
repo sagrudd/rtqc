@@ -43,8 +43,13 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), 
                         }
                     }
 
-                    let df: DataFrame = struct_to_dataframe!(fq, [accession, runid, read]).unwrap();
-                    //println!("{:?}", df);
+                    let df: DataFrame = struct_to_dataframe!(fq, [accession, runid, read, ch,
+                        start_time,
+                        protocol_group_id,
+                        sample_id,
+                        parent_read_id,
+                        basecall_model_version_id]).unwrap();
+
 
                     return df;
                 })
@@ -55,6 +60,8 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), 
             for x in results {
                 dg2.vstack_mut(&x).expect("Error merging fastq blocks");
             }
+
+            rprintln!("{:?}", dg2.get_column_names());
 
             dest = PathBuf::from(dir).join(fq_path.temp_filename("parquet"));
             let mut file = File::create(&dest).expect("could not create file");

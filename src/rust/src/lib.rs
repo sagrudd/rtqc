@@ -45,14 +45,8 @@ fn index_fastq_list(file_list: &[Rstr], dir: &str, threads: u8) -> extendr_api::
 /// Prepare an arrow file from the parquet elements in current directory 
 /// @export
 #[extendr]
-fn form_arrow(dir: &str) -> extendr_api::Robj {
-
+fn form_arrow(dir: &str) {
   arrow::prepare_arrow(dir);
-
-  let mut collapsed_results: Vec<String> = Vec::new();
-
-  return r!(collapsed_results);
-
 }
 
 
