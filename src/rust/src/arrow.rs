@@ -31,7 +31,7 @@ pub fn prepare_arrow(dir: &str) {
     }
     // flag to see if anything has been modified (requiring save)
     let mut modified = false;
-    let reference_parquet = Path::new(dir).join(REFERENCE_FILE);
+    let reference_parquet = get_arrow_path(dir);
 
     let mut df: Option<DataFrame> = None;
     
@@ -63,6 +63,11 @@ pub fn prepare_arrow(dir: &str) {
     let _ = df.clone().unwrap().get_column_names();
     rprintln!("{:?}", &df);
 
+}
+
+
+pub fn get_arrow_path(dir: &str) -> PathBuf {
+    return Path::new(dir).join(REFERENCE_FILE);
 }
 
 

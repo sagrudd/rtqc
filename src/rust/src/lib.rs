@@ -50,6 +50,14 @@ fn form_arrow(dir: &str) {
 }
 
 
+/// Get the path for the monolithic arrow file
+/// @export
+#[extendr]
+fn get_arrow_path(dir: &str) -> extendr_api::Robj {
+  //return Rstr::from_string(arrow::get_arrow_path(dir).as_os_str().to_str().unwrap());
+  return r!(arrow::get_arrow_path(dir).as_os_str().to_str().unwrap());
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -58,4 +66,5 @@ extendr_module! {
     fn index_fastq;
     fn index_fastq_list;
     fn form_arrow;
+    fn get_arrow_path;
 }

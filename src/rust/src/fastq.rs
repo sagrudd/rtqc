@@ -16,10 +16,17 @@ use crate::filehandlers::register_fq_index_pair;
 pub static FASTQ_PARQUET_LOG: &str = "fq_index_pair.txt";
 
 
-pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), String> {
+fn string_to_static_str(s: String) -> &'static str {
+    Box::leak(s.into_boxed_str())
+}
+
+pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String), String> {
     let path = Path::new(fq_path);
     rprintln!("indexing fastq [{}] on thread {:?}", path.file_name().unwrap().to_str().unwrap(), thread::current().id());
 
+    
+    let y: String = String::from(PathBuf::from(fq_path).file_name().unwrap().to_str().unwrap());
+    let x: &'static str = string_to_static_str(y);
     let mut dest = PathBuf::from(dir);
     let mut written = false;
 
@@ -37,14 +44,16 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), 
                     let mut fq: Vec<FastqEntry> = Vec::new();
                     for record_set in record_sets {
                         for record in record_set.iter() {
-                            let fastq_read = hack_fastq(record);
+                           
+                            let fastq_read = hack_fastq(x, record);
                             // println!("{}", fastq_read);
                             fq.push(fastq_read);
                         }
                     }
 
-                    let df: DataFrame = struct_to_dataframe!(fq, [accession, runid, read, ch,
+                    let df: DataFrame = struct_to_dataframe!(fq, [accession, file_of_origin, runid, read, ch,
                         start_time,
+                        flow_cell_id,
                         protocol_group_id,
                         sample_id,
                         parent_read_id,
@@ -86,11 +95,14 @@ pub fn index_fastq<'a>(fq_path: &str, dir: &'a str) -> Result<(String, String), 
     //let rfc3339 = DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00")?;
 }
 
-fn hack_fastq(record: RefRecord<'_>) -> FastqEntry {
+fn hack_fastq(file_str: &str, record: RefRecord<'_>) -> FastqEntry {
     let s = match str::from_utf8(record.head()) {
         Ok(v) => v,
         Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
     };
+
+    //let file_str = String::from("");
+
     let parts: Vec<String> = s.split(" ").map(|s| s.to_string()).collect();
     let accession = parts.first().cloned().unwrap();
     let mut fastq_meta: HashMap<String, String> = HashMap::new();
@@ -105,11 +117,13 @@ fn hack_fastq(record: RefRecord<'_>) -> FastqEntry {
     }
 
     return FastqEntry {
+        file_of_origin: Some(file_str.to_string()),
         accession: Some(accession),
         runid: pick_feature_str("runid", &fastq_meta),
         read: pick_feature_u32("read", &fastq_meta),
         ch: pick_feature_u32("ch", &fastq_meta),
         start_time: pick_feature_str("start_time", &fastq_meta),
+        flow_cell_id: pick_feature_str("flow_cell_id", &fastq_meta),
         protocol_group_id: pick_feature_str("protocol_group_id", &fastq_meta),
         sample_id: pick_feature_str("sample_id", &fastq_meta),
         parent_read_id: pick_feature_str("parent_read_id", &fastq_meta),
@@ -141,11 +155,13 @@ fn pick_feature_u32(key: &str, meta: &HashMap<String, String>) -> Option<u32> {
 
 #[derive(Debug)]
 pub struct FastqEntry {
+    pub file_of_origin: Option<String>,
     pub accession: Option<String>,
     pub runid: Option<String>,
     pub read: Option<u32>,
     pub ch: Option<u32>,
     pub start_time: Option<String>,
+    pub flow_cell_id: Option<String>,
     pub protocol_group_id: Option<String>,
     pub sample_id: Option<String>,
     pub parent_read_id: Option<String>,
@@ -155,11 +171,13 @@ pub struct FastqEntry {
 impl Default for FastqEntry {
     fn default() -> FastqEntry {
         FastqEntry {
+            file_of_origin: None,
             accession: None,
             runid: None,
             read: None,
             ch: None,
             start_time: None,
+            flow_cell_id: None,
             protocol_group_id: None,
             sample_id: None,
             parent_read_id: None,
