@@ -2,10 +2,12 @@
 
 export(basecalled_folder)
 export(form_arrow)
+export(get_arrow_path)
 export(get_bundled_path)
 export(index_fastq)
 export(index_fastq_list)
 export(sequence_set)
+export(sequence_set_summary)
 import(R6)
 import(arrow)
 useDynLib(rtqc, .registration = TRUE)

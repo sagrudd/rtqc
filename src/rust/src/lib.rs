@@ -42,11 +42,14 @@ fn index_fastq_list(file_list: &[Rstr], dir: &str, threads: u8) -> extendr_api::
 }
 
 
-/// Prepare an arrow file from the parquet elements in current directory 
+/// Prepare an arrow file from the parquet elements in current directory; return information
+/// as to whether the parquet universe is up-to-date. 
+/// 
+/// boolean result; true means that new content has been indexed / merged
 /// @export
 #[extendr]
-fn form_arrow(dir: &str) {
-  arrow::prepare_arrow(dir);
+fn form_arrow(dir: &str) -> extendr_api::Robj {
+  return r!(arrow::prepare_arrow(dir));
 }
 
 

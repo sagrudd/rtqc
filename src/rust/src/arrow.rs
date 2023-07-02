@@ -12,7 +12,7 @@ pub static ARROW_PARQUET_LOG: &str = "parquet_elements_mapped.txt";
 static REFERENCE_FILE: &str = "SequenceSet.parquet";
 
 #[allow(unused_assignments)]
-pub fn prepare_arrow(dir: &str) {
+pub fn prepare_arrow(dir: &str) -> bool {
     let fq_pairs = crate::filehandlers::load_fq_index_pairs(dir);
     let pq_mapped = crate::filehandlers::load_parquet_registrations(dir);
 
@@ -27,7 +27,7 @@ pub fn prepare_arrow(dir: &str) {
     }
 
     if novel_elements.len() == 0 {
-        return;
+        return false;
     }
     // flag to see if anything has been modified (requiring save)
     let mut modified = false;
@@ -61,7 +61,9 @@ pub fn prepare_arrow(dir: &str) {
     }
 
     let _ = df.clone().unwrap().get_column_names();
-    rprintln!("{:?}", &df);
+    //rprintln!("{:?}", &df);
+
+    return true;
 
 }
 

@@ -23,5 +23,9 @@ index_fastq_list <- function(file_list, dir, threads) .Call(wrap__index_fastq_li
 #' @export
 form_arrow <- function(dir) invisible(.Call(wrap__form_arrow, dir))
 
+#' Get the path for the monolithic arrow file
+#' @export
+get_arrow_path <- function(dir) .Call(wrap__get_arrow_path, dir)
+
 
 # nolint end

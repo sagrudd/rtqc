@@ -19,8 +19,8 @@ sequence_set <- R6::R6Class(
     #' summarise the sequence collection being processed
     #'
     #' @param cache_dir a fully qualified path to a cache directory
-    initialize = function(cache_dir) {
-      private$cache_dir <- cache_dir
+    initialize = function(basecalled_folder) {
+      private$basecalled_folder <- basecalled_folder
     },
 
     #' @description
@@ -29,22 +29,31 @@ sequence_set <- R6::R6Class(
     #' to ensure that the latest changes within the `cache_dir` are understood
     #' and that data held is up-to-date.
     sync = function() {
-      private$get_arrow()
+      return(private$get_arrow())
     },
 
     #' @description
     #' get the arrow data from the aggregate parquet file
     data = function() {
-      return(arrow::read_parquet(file.path(tempdir(), "SequenceSet.parquet")))
+      return(arrow::read_parquet(
+        get_arrow_path(private$basecalled_folder$get_cache_dir())))
+    },
 
+    as_summary = function() {
+      return(rtqc::sequence_set_summary$new(sequence_set = self))
+    },
+
+    get_bc_folder = function() {
+      return(private$basecalled_folder)
     }
+
   ),
 
   private = list(
-    cache_dir = NULL,
+    basecalled_folder = NULL,
 
     get_arrow = function() {
-      arrow <- form_arrow(private$cache_dir)
+      form_arrow(private$basecalled_folder$get_cache_dir())
     }
   )
 

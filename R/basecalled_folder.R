@@ -6,6 +6,7 @@
 #' the output from sequence basecalling.
 #'
 #' @import R6
+#' @import tibble
 #'
 #' @export
 basecalled_folder <- R6::R6Class(
@@ -59,7 +60,7 @@ basecalled_folder <- R6::R6Class(
       if (private$check_indexing()) {
         private$index_process <- callr::r_bg(
           function(x, y, z) rtqc::index_fastq_list(x, y, z),
-          args = list(file.path(private$seq_path, private$.file_list),
+          args = list(file.path(private$seq_path, private$.file_list$files),
                       private$cache_dir,
                       threads)
 
@@ -70,17 +71,33 @@ basecalled_folder <- R6::R6Class(
     #' @description
     #' prepares a `sequence_set` object from the current basecalled folder
     as_sequence_set = function() {
-      return(rtqc::sequence_set$new(private$cache_dir))
+      return(rtqc::sequence_set$new(self))
     },
 
     #' @description
     #' a public accessory method to check on what is happening with the
     #' current `basecalled_folder`
-    status = function() {
+    status = function(echo = FALSE) {
       # print some friendly information on the object ...
 
       # what is the state of the indexing process
-      private$check_indexing(echo = TRUE)
+      return(private$check_indexing(echo = echo))
+    },
+
+
+    get_cache_dir = function() {
+      return(private$cache_dir)
+    },
+
+    is_new_sequence_data = function() {
+      if (nrow(private$.file_list) < nrow(private$get_sequence_file_list())) {
+        return(TRUE)
+      }
+      return(FALSE)
+    },
+
+    get_list = function() {
+      return(private$get_sequence_file_list())
     }
   ),
 
@@ -97,73 +114,103 @@ basecalled_folder <- R6::R6Class(
     index_process = NULL,
     valid = FALSE,
 
+
+    get_sequence_file_list = function() {
+      file_list <- list.files(private$seq_path,
+                              recursive = TRUE,
+                              pattern = "fq$|fq.gz$|fastq$|fastq.gz$",
+                              ignore.case = TRUE)
+
+      insufficient_readable <- simpleError("No files of defined format found")
+      ambiguous_format <- simpleError("Ambiguous format; more than one possibility")
+      depth_collision <- simpleError("There are sequence reads at more than one depth level")
+
+      filetib <- tryCatch(
+        {
+          ffiles <- factor(rep("UNKNOWN", length(file_list)),
+                           levels = c("UNKNOWN", "FASTQ", "BAM", "SAM"))
+          ffiles[
+            which(grepl("fq$|fq.gz$|fastq$|fastq.gz$", file_list,
+                  ignore.case = TRUE))] <- "FASTQ"
+
+          depths <- unlist(
+            lapply(file_list, function(x) {
+              length(unlist(strsplit(x, .Platform$file.sep)))
+            }))
+          barcode_assignment <- rep("unbarcoded", length(file_list))
+
+          filetib <- tibble::tibble(files=file_list, barcode=barcode_assignment, types=ffiles, depths=depths)
+
+          ftypes <- length(unique(filetib$types))
+
+          if (ftypes == 0) stop(insufficient_readable)
+          else if (ftypes > 1) stop(ambiguous_format)
+
+          # question two - is the directory depth for sequences homogeneous?
+          udepth <- unique(filetib$depths)
+          if (length(udepth) != 1) stop(depth_collision)
+
+          if (length(udepth) == 1 && udepth <= 2 && ftypes == 1) {
+            if (udepth == 1) {
+              private$valid <- TRUE
+              private$file_format <- unique(ffiles)
+              private$file_count <- length(private$.file_list)
+            } else if (udepth == 2) {
+              fframe <- do.call(rbind, strsplit(file_list,
+                                                .Platform$file.sep))
+              filetib$barcode <- fframe[,1]
+              if (is.null(private$.sample_sheet)) {
+                # unclassified is off by default
+                if (!private$.use_unclassified) {
+                  rm_unclassified <- which(filetib$barcode == "unclassified")
+                  if (length(rm_unclassified) > 0) {
+                    filetib <- filetib[-rm_unclassified,]
+                  }
+                }
+                retain_barcodes <- which(grepl("^barcode[0-9]+$|unclassified",
+                                               filetib$barcode))
+                filetib <- filetib[retain_barcodes,]
+                if (length(unique(filetib$barcode)) >= 1) {
+                  private$valid <- TRUE
+                  private$barcoded <- TRUE
+                  private$file_format <- unique(ffiles)
+                  private$file_count <- nrow(fframe)
+                  private$barcode_count <- length(unique(filetib$barcode))
+                }
+              }
+            }
+          }
+        },
+        error = function(x) {
+          return(x)
+        },
+        finally = {
+          return(filetib)
+        }
+      )
+
+      return(filetib)
+    },
+
+
     #' evaluates the defined private$seq_path for sequence files that are the
     #' result of a base calling analysis using either MinKNOW or Dorado. This
     #' method will support FASTQ, SAM and BAM file formats.
     sequence_scan = function() {
-      private$.file_list <- list.files(private$seq_path,
-                          recursive = TRUE,
-                          pattern = "fq$|fq.gz$|fastq$|fastq.gz$",
-                          ignore.case = TRUE)
-
-      # question one - are the sequences all FASTQ / BAM / SAM
-      ffiles <- factor(rep("UNKNOWN", length(private$.file_list)),
-                       levels = c("UNKNOWN", "FASTQ", "BAM", "SAM"))
-      ffiles <- ffiles[
-        grepl("fq$|fq.gz$|fastq$|fastq.gz$", private$.file_list,
-              ignore.case = TRUE)] <- "FASTQ"
-      ftypes <- length(unique(ffiles))
-
-      # question two - is the directory depth for sequences homogeneous?
-      depths <- unlist(
-        lapply(private$.file_list, function(x) {
-          length(unlist(strsplit(x, .Platform$file.sep)))
-        }))
-      udepth <- unique(depths)
-
-      # split read files into barcode groups
-      if (length(udepth) == 1 && udepth <= 2 && ftypes == 1) {
-        if (udepth == 1) {
-          private$valid <- TRUE
-          private$file_format <- unique(ffiles)
-          private$file_count <- length(private$.file_list)
-        } else if (udepth == 2) {
-          fframe <- do.call(rbind, strsplit(private$.file_list,
-                                            .Platform$file.sep))
-          if (is.null(private$.sample_sheet)) {
-            # unclassified is off by default
-            if (!private$.use_unclassified) {
-              rm_unclassified <- which(fframe[, 1] == "unclassified")
-              fframe <- fframe[-rm_unclassified, ]
-              private$.file_list <- private$.file_list[-rm_unclassified]
-            }
-            retain_barcodes <- which(grepl("^barcode[0-9]+$|unclassified",
-                                           fframe[, 1]))
-            fframe <- fframe[retain_barcodes, ]
-            private$.file_list <- private$.file_list[retain_barcodes]
-            if (length(unique(fframe[, 1])) >= 1) {
-              private$valid <- TRUE
-              private$barcoded <- TRUE
-              private$file_format <- unique(ffiles)
-              private$file_count <- nrow(fframe)
-              private$barcode_count <- length(unique(fframe[, 1]))
-            }
-          }
-        }
-      }
+      private$.file_list <- private$get_sequence_file_list()
     },
 
     check_indexing = function(echo = FALSE) {
       if (is.null(private$index_process)) {
         if (echo) cat(paste("Indexing process is not running", "\n"))
-        return(r <- TRUE)
+        return(TRUE)
       } else if (private$index_process$is_alive()) {
         if (echo) cat(paste("Indexing process is currently running", "\n"))
-        return(r <- FALSE)
+        return(FALSE)
       } else if (!private$index_process$is_alive()) {
         if (echo) cat(paste("Indexing process has completed", "\n"))
         private$index_process <- NULL
-        return(r <- TRUE)
+        return(TRUE)
       }
     }
   )

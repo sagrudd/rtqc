@@ -1,7 +1,7 @@
 use file_lock::{FileLock, FileOptions};
 use std::io::prelude::*;
 use std::path::Path;
-use extendr_api::{rprintln, print_r_output};
+// use extendr_api::{rprintln, print_r_output};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -66,7 +66,7 @@ fn read_file_content(file_path: PathBuf) -> String {
                         .read(true)
                         .create(true)
                         .append(true);
-    rprintln!("loading file {:?}", file_path);
+    // rprintln!("loading file {:?}", file_path);
 
     let mut filelock = match FileLock::lock(file_path, should_we_block, options) {
         Ok(lock) => lock,
