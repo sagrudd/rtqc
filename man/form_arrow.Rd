@@ -2,10 +2,11 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{form_arrow}
 \alias{form_arrow}
-\title{Prepare an arrow file from the parquet elements in current directory}
+\title{Prepare an arrow file from the parquet elements in current directory; return information
+as to whether the parquet universe is up-to-date.}
 \usage{
 form_arrow(dir)
 }
 \description{
-Prepare an arrow file from the parquet elements in current directory
+boolean result; true means that new content has been indexed / merged
 }

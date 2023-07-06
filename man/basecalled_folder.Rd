@@ -15,6 +15,9 @@ the output from sequence basecalling.
 \item \href{#method-basecalled_folder-index}{\code{basecalled_folder$index()}}
 \item \href{#method-basecalled_folder-as_sequence_set}{\code{basecalled_folder$as_sequence_set()}}
 \item \href{#method-basecalled_folder-status}{\code{basecalled_folder$status()}}
+\item \href{#method-basecalled_folder-get_cache_dir}{\code{basecalled_folder$get_cache_dir()}}
+\item \href{#method-basecalled_folder-is_new_sequence_data}{\code{basecalled_folder$is_new_sequence_data()}}
+\item \href{#method-basecalled_folder-get_list}{\code{basecalled_folder$get_list()}}
 \item \href{#method-basecalled_folder-clone}{\code{basecalled_folder$clone()}}
 }
 }
@@ -113,7 +116,34 @@ evaluates the defined private$seq_path for sequence files that are the
 result of a base calling analysis using either MinKNOW or Dorado. This
 method will support FASTQ, SAM and BAM file formats.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$status()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$status(echo = FALSE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-get_cache_dir"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-get_cache_dir}{}}}
+\subsection{Method \code{get_cache_dir()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$get_cache_dir()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-is_new_sequence_data"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-is_new_sequence_data}{}}}
+\subsection{Method \code{is_new_sequence_data()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$is_new_sequence_data()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-get_list"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-get_list}{}}}
+\subsection{Method \code{get_list()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$get_list()}\if{html}{\out{</div>}}
 }
 
 }

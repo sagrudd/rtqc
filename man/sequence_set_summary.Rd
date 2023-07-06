@@ -11,10 +11,13 @@ of sequence_set information
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-sequence_set_summary-new}{\code{sequence_set_summary$new()}}
+\item \href{#method-sequence_set_summary-touch}{\code{sequence_set_summary$touch()}}
+\item \href{#method-sequence_set_summary-get_data}{\code{sequence_set_summary$get_data()}}
 \item \href{#method-sequence_set_summary-summary}{\code{sequence_set_summary$summary()}}
 \item \href{#method-sequence_set_summary-read_count}{\code{sequence_set_summary$read_count()}}
 \item \href{#method-sequence_set_summary-read_bases}{\code{sequence_set_summary$read_bases()}}
 \item \href{#method-sequence_set_summary-quality_highlights}{\code{sequence_set_summary$quality_highlights()}}
+\item \href{#method-sequence_set_summary-n50calc}{\code{sequence_set_summary$n50calc()}}
 \item \href{#method-sequence_set_summary-length_highlights}{\code{sequence_set_summary$length_highlights()}}
 \item \href{#method-sequence_set_summary-temporal_highlights}{\code{sequence_set_summary$temporal_highlights()}}
 \item \href{#method-sequence_set_summary-pore_highlights}{\code{sequence_set_summary$pore_highlights()}}
@@ -29,7 +32,7 @@ Constructor method for \code{sequence_set_summary} requires just a
 sequence_set object that will provide the other file interaction
 capabilities
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$new(sequence_set)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$new(path = NULL, sequence_set = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -39,6 +42,24 @@ capabilities
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-sequence_set_summary-touch"></a>}}
+\if{latex}{\out{\hypertarget{method-sequence_set_summary-touch}{}}}
+\subsection{Method \code{touch()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$touch()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-sequence_set_summary-get_data"></a>}}
+\if{latex}{\out{\hypertarget{method-sequence_set_summary-get_data}{}}}
+\subsection{Method \code{get_data()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$get_data()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sequence_set_summary-summary"></a>}}
@@ -79,7 +100,7 @@ returns the number of sequence reads that are defined within the object
 \subsection{Method \code{read_bases()}}{
 returns a numeric defining the number of bases observed
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$read_bases(scale = "Gb")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$read_bases(scale = "Gb", dpoints = 2)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -100,6 +121,15 @@ appropriate scale
 \subsection{Method \code{quality_highlights()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$quality_highlights()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-sequence_set_summary-n50calc"></a>}}
+\if{latex}{\out{\hypertarget{method-sequence_set_summary-n50calc}{}}}
+\subsection{Method \code{n50calc()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{sequence_set_summary$n50calc(b = 0.5)}\if{html}{\out{</div>}}
 }
 
 }
