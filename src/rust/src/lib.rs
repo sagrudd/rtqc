@@ -61,6 +61,15 @@ fn get_arrow_path(dir: &str) -> extendr_api::Robj {
   return r!(arrow::get_arrow_path(dir).as_os_str().to_str().unwrap());
 }
 
+
+/// calculate mean quality score from an ASCII quality string 
+/// @export
+#[extendr]
+fn get_qscore(qualstr: &str) -> extendr_api::Robj {
+  return r!(fastq::u8_to_mean_q(qualstr.as_bytes()));
+}
+
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -70,4 +79,5 @@ extendr_module! {
     fn index_fastq_list;
     fn form_arrow;
     fn get_arrow_path;
+    fn get_qscore;
 }

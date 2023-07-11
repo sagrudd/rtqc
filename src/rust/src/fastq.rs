@@ -116,6 +116,16 @@ fn hack_fastq(file_str: &str, record: RefRecord<'_>) -> FastqEntry {
         }
     }
 
+    /* 
+    let mut basequals: Vec<f32> = Vec::new();
+    for b in record.qual() {
+        basequals.push(10_f32.powf(f32::from(b - 33) / -10_f32));
+    }
+    let meanerror = basequals.iter().sum::<f32>() as f32 / basequals.len() as f32;
+    let meanscore = -10_f32 * meanerror.log10();
+    */
+
+
     return FastqEntry {
         file_of_origin: Some(file_str.to_string()),
         accession: Some(accession),
@@ -128,10 +138,17 @@ fn hack_fastq(file_str: &str, record: RefRecord<'_>) -> FastqEntry {
         sample_id: pick_feature_str("sample_id", &fastq_meta),
         parent_read_id: pick_feature_str("parent_read_id", &fastq_meta),
         basecall_model_version_id: pick_feature_str("basecall_model_version_id", &fastq_meta),
-        quality: Some(1.23),
+        quality: Some(u8_to_mean_q(record.qual())),
 
         ..Default::default()
     };
+}
+
+
+pub fn u8_to_mean_q(qual: &[u8]) -> f32 {
+    let basequals: Vec<f32> = qual.iter().map(|b| 10_f32.powf(f32::from(b - 33) / -10_f32)).collect::<Vec<f32>>();
+    let meanscore = -10_f32 * (basequals.iter().sum::<f32>() as f32 / basequals.len() as f32).log10();
+    return meanscore;
 }
 
 
