@@ -57,7 +57,7 @@ pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String
                         protocol_group_id,
                         sample_id,
                         parent_read_id,
-                        basecall_model_version_id]).unwrap();
+                        basecall_model_version_id, quality]).unwrap();
 
 
                     return df;
@@ -128,6 +128,7 @@ fn hack_fastq(file_str: &str, record: RefRecord<'_>) -> FastqEntry {
         sample_id: pick_feature_str("sample_id", &fastq_meta),
         parent_read_id: pick_feature_str("parent_read_id", &fastq_meta),
         basecall_model_version_id: pick_feature_str("basecall_model_version_id", &fastq_meta),
+        quality: Some(1.23),
 
         ..Default::default()
     };
@@ -166,6 +167,7 @@ pub struct FastqEntry {
     pub sample_id: Option<String>,
     pub parent_read_id: Option<String>,
     pub basecall_model_version_id: Option<String>,
+    pub quality: Option<f32>,
 }
 
 impl Default for FastqEntry {
@@ -182,6 +184,7 @@ impl Default for FastqEntry {
             sample_id: None,
             parent_read_id: None,
             basecall_model_version_id: None,
+            quality: None,
         }
     }
 }
