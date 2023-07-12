@@ -70,6 +70,15 @@ fn get_qscore(qualstr: &str) -> extendr_api::Robj {
 }
 
 
+/// calculate mean quality score from a vector of phred scores
+/// @export
+#[extendr]
+fn get_mean_qscore(phred_scores: &[f64]) -> extendr_api::Robj {
+  let basequals: Vec<f64> = phred_scores.iter().map(|q| 10_f64.powf(q / -10_f64)).collect::<Vec<f64>>();
+  return r!(-10_f32 * (basequals.iter().sum::<f64>() as f32 / basequals.len() as f32).log10());
+}
+
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -80,4 +89,5 @@ extendr_module! {
     fn form_arrow;
     fn get_arrow_path;
     fn get_qscore;
+    fn get_mean_qscore;
 }
