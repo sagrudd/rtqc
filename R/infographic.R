@@ -91,6 +91,8 @@ Infographic <- R6::R6Class(
                 pattern="file", tmpdir=tempdir(), fileext=".png")) {
             plot <- self$shinyplot()
 
+            df <- self$as_tibble()
+
             save_x = (max(df$x)+self$panel.width+self$panel.spacer) * 0.6
             save_y = (max(df$y)+self$panel.height+self$panel.spacer) * 0.6
 

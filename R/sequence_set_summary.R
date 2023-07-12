@@ -18,14 +18,37 @@ sequence_set_summary <- R6::R6Class(
     #' capabilities
     #'
     #' @param sequence_set an existing sequence_set object
-    initialize = function(path=NULL, sequence_set=NULL) {
+    initialize = function(path=NULL, sequence_set=NULL, threads=1) {
 
       if (!is.null(path)) {
         bf <- rtqc::basecalled_folder$new(path)
-        bf$index(threads=8)
+        bf$index(threads=threads)
         private$sequence_set <- bf$as_sequence_set()
-      } else if (!is.null(sequence_set)) private$sequence_set <- sequence_set
+      } else if (!is.null(sequence_set)) {
+        private$sequence_set <- sequence_set
+      }
     },
+
+
+    shiny_touch = function() {
+      result <- list()
+
+      delta <- private$poke_parquet()
+
+      if (delta || is.null(private$data)) {
+        private$data <- private$sequence_set$data()
+
+        result$files <- length(unique(private$data$file_of_origin))
+        result$reads <- self$read_count()
+        result$bases <- self$read_bases()
+        result$length <- sprintf(mean(private$data$read), fmt = "%#.1f")
+        result$quality <- sprintf(get_mean_qscore(private$data$quality), fmt = "%#.2f")
+        return(result)
+      }
+
+      NULL
+    },
+
 
     touch = function() {
 
@@ -34,27 +57,16 @@ sequence_set_summary <- R6::R6Class(
       # are we up-to-date? Check first whether there are new files available
       if (private$sequence_set$get_bc_folder()$is_new_sequence_data()) {
         cat(paste0("sequence collection has new content", "\n"))
-      } else {
-        cat(paste0("sequence collection appears up-to-date", "\n"))
       }
 
-      poke_parquet = function() {
-        if (private$sequence_set$sync()) {
-          cat(paste0("sequence dataset has been updated ...", "\n"))
-          return(TRUE)
-        } else {
-          cat(paste0("sequence dataset is unchanged", "\n"))
-          return(FALSE)
-        }
-      }
+
 
       while (private$sequence_set$get_bc_folder()$status() == FALSE) {
         cat(paste0("sequence collection is being indexed - waiting", "\n"))
-        delta <- poke_parquet()
         Sys.sleep(0.5)
       }
 
-      delta <- poke_parquet()
+      delta <- private$poke_parquet()
 
       if (delta || is.null(private$data)) {
         cat(paste0("reloading the stored data object", "\n"))
@@ -109,8 +121,9 @@ sequence_set_summary <- R6::R6Class(
       } else if (toupper(scale) == "TB") {
         bases <- bases / 1000000000000
       }
-      fstr = sprintf("%%#.%df", dpoints)
-      sprintf(bases, fmt = fstr)
+      fstr <- sprintf("%%#.%df", dpoints)
+      val <- sprintf(bases, fmt = fstr)
+      list(res=val, raw=bases, unit=scale, str=paste0(val, " (", scale, ")"))
     },
 
     quality_highlights = function() {
@@ -122,17 +135,13 @@ sequence_set_summary <- R6::R6Class(
       return(1)
     },
 
-    n50calc = function(b = 0.5) {
-      len_sorted <- sort(private$data$read, decreasing = TRUE)
-      len_sorted[cumsum(len_sorted) >= sum(len_sorted)*b][1]
-    },
 
     length_highlights = function() {
       list(
         shortest = min(private$data$read),
         longest = max(private$data$read),
-        n50 = n50calc(),
-        n90 = n50calc(b=0.9),
+        n50 = n50calc(private$data$read),
+        n90 = n50calc(private$data$read, n=0.9),
         mean = mean(private$data$read),
         median = median(private$data$read)
       )
@@ -156,7 +165,17 @@ sequence_set_summary <- R6::R6Class(
   ),
 
   private = list(
+    ping = 1,
     sequence_set = NULL,
-    data = NULL
+    data = NULL,
+
+    poke_parquet = function() {
+      if (private$sequence_set$sync()) {
+        cat(paste0("sequence dataset has been updated ...", "\n"))
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    }
   )
 )

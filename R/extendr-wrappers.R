@@ -30,5 +30,13 @@ form_arrow <- function(dir) .Call(wrap__form_arrow, dir)
 #' @export
 get_arrow_path <- function(dir) .Call(wrap__get_arrow_path, dir)
 
+#' calculate mean quality score from an ASCII quality string 
+#' @export
+get_qscore <- function(qualstr) .Call(wrap__get_qscore, qualstr)
+
+#' calculate mean quality score from a vector of phred scores
+#' @export
+get_mean_qscore <- function(phred_scores) .Call(wrap__get_mean_qscore, phred_scores)
+
 
 # nolint end

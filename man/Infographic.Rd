@@ -41,6 +41,7 @@ within the \code{Infographic}.}
 \item \href{#method-Infographic-add}{\code{Infographic$add()}}
 \item \href{#method-Infographic-as_tibble}{\code{Infographic$as_tibble()}}
 \item \href{#method-Infographic-plot}{\code{Infographic$plot()}}
+\item \href{#method-Infographic-shinyplot}{\code{Infographic$shinyplot()}}
 \item \href{#method-Infographic-display_fa}{\code{Infographic$display_fa()}}
 \item \href{#method-Infographic-clone}{\code{Infographic$clone()}}
 }
@@ -104,6 +105,16 @@ file will be created and used by default).}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Infographic-shinyplot"></a>}}
+\if{latex}{\out{\hypertarget{method-Infographic-shinyplot}{}}}
+\subsection{Method \code{shinyplot()}}{
+Emit the infographic as a plot for rendering in e.g. shiny
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Infographic$shinyplot()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Infographic-display_fa"></a>}}

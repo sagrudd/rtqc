@@ -35,7 +35,7 @@ Angenieux <- R6::R6Class(
 
       self$colourMap <- ggsci:::ggsci_db[["startrek"]][[1]]
 
-      private$hm.palette = grDevices::colorRampPalette(
+      private$hm.palette <- grDevices::colorRampPalette(
         RColorBrewer::brewer.pal(9, "Blues"), space = "Lab")
       private$.plot_elements <- list()
 
@@ -43,29 +43,27 @@ Angenieux <- R6::R6Class(
         if (!is.matrix(value)) {
           stop("this requires a matrix")
         }
-        private$graph_type = key
+        private$graph_type <- key
         private$graph_data <- value
       } else if (key == "1D_count") {
         if (!tibble::is_tibble(value)) {
           stop("this requires a tibble")
         }
-        private$graph_type = key
+        private$graph_type <- key
         private$graph_data <- value
       } else if (key == "2D_count") {
         if (!tibble::is_tibble(value)) {
           stop("this requires a tibble")
         }
-        private$graph_type = key
+        private$graph_type <- key
         private$graph_data <- value
       }  else if (key == "boxplot") {
         if (!tibble::is_tibble(value)) {
           stop("this requires a tibble")
         }
-        private$graph_type = key
+        private$graph_type <- key
         private$graph_data <- value
-      }
-
-      else {
+      } else {
         stop(paste0("Graph type [",key,"] not implemented"))
       }
     },
