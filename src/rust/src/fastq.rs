@@ -26,7 +26,7 @@ pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String
 
     let y: String = String::from(PathBuf::from(fq_path).file_name().unwrap().to_str().unwrap());
     let x: &'static str = string_to_static_str(y);
-    let mut dest = PathBuf::from(dir);
+    //let dest = PathBuf::from(dir);
     let mut written = false;
 
     // check that fastq specified exists
@@ -37,7 +37,7 @@ pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String
     } else {
 
         // create a path to which the output should be written (or handle if the file already exists)
-        dest = PathBuf::from(dir).join(fq_path.temp_filename("parquet"));
+        let dest = PathBuf::from(dir).join(fq_path.temp_filename("parquet"));
 
         // if the parquet file already exists - just move on ...
         if !dest.exists() {
@@ -86,18 +86,18 @@ pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String
             })
             .expect("Invalid compression");
         }
-    }   
-    if written {
-        register_fq_index_pair(dir, path.to_str().unwrap(), dest.to_str().unwrap());
-    }
+      
+        if written {
+            register_fq_index_pair(dir, path.to_str().unwrap(), dest.to_str().unwrap());
+        }
 
-    if dest.exists() {
-        return Ok((path.to_str().map(String::from).unwrap(),
-            dest.to_str().map(String::from).unwrap()));
-    } else {
-        return Err(String::from("something not quite right"));
-    }
-
+        if dest.exists() {
+            return Ok((path.to_str().map(String::from).unwrap(),
+                dest.to_str().map(String::from).unwrap()));
+        } else {
+            return Err(String::from("something not quite right"));
+        }
+    } 
     //let rfc3339 = DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00")?;
 }
 
@@ -121,16 +121,6 @@ fn hack_fastq(file_str: &str, record: RefRecord<'_>) -> FastqEntry {
             );
         }
     }
-
-    /* 
-    let mut basequals: Vec<f32> = Vec::new();
-    for b in record.qual() {
-        basequals.push(10_f32.powf(f32::from(b - 33) / -10_f32));
-    }
-    let meanerror = basequals.iter().sum::<f32>() as f32 / basequals.len() as f32;
-    let meanscore = -10_f32 * meanerror.log10();
-    */
-
 
     return FastqEntry {
         file_of_origin: Some(file_str.to_string()),

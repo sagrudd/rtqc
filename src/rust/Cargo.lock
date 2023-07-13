@@ -742,6 +742,7 @@ checksum = "95765f67b4b18863968b4a1bd5bb576f732b29a4a28c7cd84c09fa3e2875f33c"
 [[package]]
 name = "fastq"
 version = "0.6.0"
+source = "git+https://github.com/sagrudd/fastq-rs.git#6f0e4fe897da497fc731bafb81f8e528a9ad7aad"
 dependencies = [
  "memchr",
  "niffler",
