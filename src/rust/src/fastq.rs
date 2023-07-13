@@ -9,7 +9,7 @@ use std::str;
 use std::path::PathBuf;
 use temp_file_name::{self, TempFilePath};
 use extendr_api::{rprintln, print_r_output};
-use std::thread;
+// use std::thread;
 use crate::filehandlers::register_fq_index_pair;
 
 
@@ -22,9 +22,8 @@ fn string_to_static_str(s: String) -> &'static str {
 
 pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String), String> {
     let path = Path::new(fq_path);
-    rprintln!("indexing fastq [{}] on thread {:?}", path.file_name().unwrap().to_str().unwrap(), thread::current().id());
+    // rprintln!("indexing fastq [{}] on thread {:?}", path.file_name().unwrap().to_str().unwrap(), thread::current().id());
 
-    
     let y: String = String::from(PathBuf::from(fq_path).file_name().unwrap().to_str().unwrap());
     let x: &'static str = string_to_static_str(y);
     let mut dest = PathBuf::from(dir);
@@ -33,59 +32,66 @@ pub fn index_fastq<'a>(fq_path: &'a str, dir: &'a str) -> Result<(String, String
     // check that fastq specified exists
     if !Path::new(fq_path).exists() {
         let estr = format!("file [{}] not found", fq_path);
-        eprintln!("{}", estr.as_str());
+        rprintln!("{}", estr.as_str());
         return Err::<(String, String), String>(estr);
     } else {
-        parse_path(Some(fq_path), |parser| {
-            let nthreads = 1;
 
-            let results: Vec<DataFrame> = parser
-                .parallel_each(nthreads, |record_sets| {
-                    let mut fq: Vec<FastqEntry> = Vec::new();
-                    for record_set in record_sets {
-                        for record in record_set.iter() {
-                           
-                            let fastq_read = hack_fastq(x, record);
-                            // println!("{}", fastq_read);
-                            fq.push(fastq_read);
+        // create a path to which the output should be written (or handle if the file already exists)
+        dest = PathBuf::from(dir).join(fq_path.temp_filename("parquet"));
+
+        // if the parquet file already exists - just move on ...
+        if !dest.exists() {
+
+            parse_path(Some(fq_path), |parser| {
+                let nthreads = 1;
+
+                let results: Vec<DataFrame> = parser
+                    .parallel_each(nthreads, |record_sets| {
+                        let mut fq: Vec<FastqEntry> = Vec::new();
+                        for record_set in record_sets {
+                            for record in record_set.iter() {
+                            
+                                let fastq_read = hack_fastq(x, record);
+                                // println!("{}", fastq_read);
+                                fq.push(fastq_read);
+                            }
                         }
-                    }
 
-                    let df: DataFrame = struct_to_dataframe!(fq, [accession, file_of_origin, runid, read, ch,
-                        start_time,
-                        flow_cell_id,
-                        protocol_group_id,
-                        sample_id,
-                        parent_read_id,
-                        basecall_model_version_id, quality]).unwrap();
+                        let df: DataFrame = struct_to_dataframe!(fq, [accession, file_of_origin, runid, read, ch,
+                            start_time,
+                            flow_cell_id,
+                            protocol_group_id,
+                            sample_id,
+                            parent_read_id,
+                            basecall_model_version_id, quality]).unwrap();
 
-
-                    return df;
-                })
-                .expect("Invalid fastq file");
+                        return df;
+                    })
+                    .expect("Invalid fastq file");
 
 
-            let mut dg2 = DataFrame::default();
-            for x in results {
-                dg2.vstack_mut(&x).expect("Error merging fastq blocks");
-            }
+                let mut dg2 = DataFrame::default();
+                for x in results {
+                    dg2.vstack_mut(&x).expect("Error merging fastq blocks");
+                }
 
-            rprintln!("{:?}", dg2.get_column_names());
+                // rprintln!("{:?}", dg2.get_column_names());
 
-            dest = PathBuf::from(dir).join(fq_path.temp_filename("parquet"));
-            let mut file = File::create(&dest).expect("could not create file");
-            ParquetWriter::new(&mut file)
-                .finish(&mut dg2)
-                .expect("failed to write parquet");
-            written = true;
-        })
-        .expect("Invalid compression");
+                
+                let mut file = File::create(&dest).expect("could not create file");
+                ParquetWriter::new(&mut file)
+                    .finish(&mut dg2)
+                    .expect("failed to write parquet");
+                written = true;
+            })
+            .expect("Invalid compression");
+        }
+    }   
+    if written {
+        register_fq_index_pair(dir, path.to_str().unwrap(), dest.to_str().unwrap());
     }
 
-    if written {
-
-        register_fq_index_pair(dir, path.to_str().unwrap(), dest.to_str().unwrap());
-
+    if dest.exists() {
         return Ok((path.to_str().map(String::from).unwrap(),
             dest.to_str().map(String::from).unwrap()));
     } else {

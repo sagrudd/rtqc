@@ -36,3 +36,4 @@ rsconnect/
 .Rproj.user
 inst
 .DS_Store
+src/rust/Cargo.lock
