@@ -15,9 +15,11 @@ the output from sequence basecalling.
 \item \href{#method-basecalled_folder-index}{\code{basecalled_folder$index()}}
 \item \href{#method-basecalled_folder-as_sequence_set}{\code{basecalled_folder$as_sequence_set()}}
 \item \href{#method-basecalled_folder-status}{\code{basecalled_folder$status()}}
+\item \href{#method-basecalled_folder-status_str}{\code{basecalled_folder$status_str()}}
 \item \href{#method-basecalled_folder-get_cache_dir}{\code{basecalled_folder$get_cache_dir()}}
 \item \href{#method-basecalled_folder-is_new_sequence_data}{\code{basecalled_folder$is_new_sequence_data()}}
-\item \href{#method-basecalled_folder-get_list}{\code{basecalled_folder$get_list()}}
+\item \href{#method-basecalled_folder-get_sequence_file_info}{\code{basecalled_folder$get_sequence_file_info()}}
+\item \href{#method-basecalled_folder-list_files}{\code{basecalled_folder$list_files()}}
 \item \href{#method-basecalled_folder-clone}{\code{basecalled_folder$clone()}}
 }
 }
@@ -112,11 +114,19 @@ prepares a \code{sequence_set} object from the current basecalled folder
 \subsection{Method \code{status()}}{
 a public accessory method to check on what is happening with the
 current \code{basecalled_folder}
-evaluates the defined private$seq_path for sequence files that are the
-result of a base calling analysis using either MinKNOW or Dorado. This
-method will support FASTQ, SAM and BAM file formats.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$status(echo = FALSE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-status_str"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-status_str}{}}}
+\subsection{Method \code{status_str()}}{
+a public accessory method to check on what is happening with the
+current \code{basecalled_folder}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$status_str()}\if{html}{\out{</div>}}
 }
 
 }
@@ -133,17 +143,41 @@ method will support FASTQ, SAM and BAM file formats.
 \if{html}{\out{<a id="method-basecalled_folder-is_new_sequence_data"></a>}}
 \if{latex}{\out{\hypertarget{method-basecalled_folder-is_new_sequence_data}{}}}
 \subsection{Method \code{is_new_sequence_data()}}{
+check whether new sequences have become available within the dataset
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$is_new_sequence_data()}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-basecalled_folder-get_list"></a>}}
-\if{latex}{\out{\hypertarget{method-basecalled_folder-get_list}{}}}
-\subsection{Method \code{get_list()}}{
+\if{html}{\out{<a id="method-basecalled_folder-get_sequence_file_info"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-get_sequence_file_info}{}}}
+\subsection{Method \code{get_sequence_file_info()}}{
+return a tibble containing information on the sequence files identified
+within this \code{basecalled_folder} instance.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$get_list()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$get_sequence_file_info(qualified_path = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{qualified_path}}{defines whether the tibble should return qualified
+file paths in the output}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-basecalled_folder-list_files"></a>}}
+\if{latex}{\out{\hypertarget{method-basecalled_folder-list_files}{}}}
+\subsection{Method \code{list_files()}}{
+return a vector of file paths that have been characterised
+evaluates the defined private$seq_path for sequence files that are the
+result of a base calling analysis using either MinKNOW or Dorado. This
+method will support FASTQ, SAM and BAM file formats.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{basecalled_folder$list_files()}\if{html}{\out{</div>}}
 }
 
 }

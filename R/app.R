@@ -13,6 +13,7 @@ plan(multisession)
 myApp <- function(path, ...) {
 
   seq_summary <- sequence_set_summary$new(path, threads=2)
+  untouched <- TRUE
 
   # Define UI for application that draws a histogram
   ui <- fluidPage(
@@ -50,11 +51,14 @@ myApp <- function(path, ...) {
       mean_quality <- reactiveVal(value="0")
 
       future({
+
         while (1) {
-          Sys.sleep(1)
+
           # result <- data.frame(count=i)
           # change value
 
+          if (seq_summary$get_sequence_set()$sync() || untouched) {
+            untouched <- FALSE
           facets <- seq_summary$shiny_touch()
           if (is.list(facets)) {
 
@@ -64,6 +68,8 @@ myApp <- function(path, ...) {
             queue$producer$fireAssignReactive("mean_length", facets$length)
             queue$producer$fireAssignReactive("mean_quality", facets$quality)
           }
+          }
+          Sys.sleep(1)
         }
       })
 

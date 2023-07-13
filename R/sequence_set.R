@@ -21,6 +21,44 @@ sequence_set <- R6::R6Class(
     #' @param cache_dir a fully qualified path to a cache directory
     initialize = function(basecalled_folder) {
       private$basecalled_folder <- basecalled_folder
+      self$wait_until_data()
+      self$sync()
+    },
+
+    #' @description
+    #' this print method overrides the standard print function as included with
+    #' R6 objects - this is to better define what is contained within the object
+    #' and to provide better `rtqc` abstraction
+    #'
+    #' @param ... additional stuff passed on
+    #'
+    #' @return nothing (at present) - output to stdout
+    print = function(...) {
+      cat(paste0("<rtqc::", class(self)[1], ">\n",
+                 "\tparquet_path=", private$basecalled_folder$get_cache_dir(), "\n",
+                 "\tstatus=", private$basecalled_folder$status_str(), "\n",
+                 "\tparquet_pairs=", private$parquet_pairs, "\n"))
+    },
+
+    #' @description
+    #' A method to ensure that some parseable data should have been written
+    wait_until_data = function(pause=0.1) {
+      if (!private$basecalled_folder$status()) {
+        # status is false - indexing is still running
+        while (length(get_indexed_tuples(private$basecalled_folder$get_cache_dir())) == 0) {
+          Sys.sleep(pause)
+        }
+      }
+    },
+
+    #' @description
+    #' prepare a tibble of sequence/parquet pairs
+    get_parquet_pairs = function() {
+      self$wait_until_data()
+      my_matrix <- matrix(
+        data=get_indexed_tuples(private$basecalled_folder$get_cache_dir()),
+        ncol=2, byrow=TRUE)
+      return(tibble::tibble(sequence=my_matrix[,1], parquet=my_matrix[,2]))
     },
 
     #' @description
@@ -29,17 +67,30 @@ sequence_set <- R6::R6Class(
     #' to ensure that the latest changes within the `cache_dir` are understood
     #' and that data held is up-to-date.
     sync = function() {
-      return(private$get_arrow())
+      # return(private$get_arrow())
+      initial <- private$parquet_pairs
+      current <- nrow(self$get_parquet_pairs())
+      if (current > initial) {
+        private$parquet_pairs <- current
+        return(TRUE)
+      }
+      return(FALSE)
     },
 
     #' @description
     #' get the arrow data from the aggregate parquet file
     data = function() {
-      return(arrow::read_parquet(
-        get_arrow_path(private$basecalled_folder$get_cache_dir())))
+      self$wait_until_data()
+
+      parquet <- self$get_parquet_pairs()$parquet
+
+      #return(arrow::read_parquet(
+      #  get_arrow_path(private$basecalled_folder$get_cache_dir())))
+      return(dplyr::bind_rows(lapply(parquet, arrow::read_parquet)))
     },
 
     as_summary = function() {
+      self$wait_until_data()
       return(rtqc::sequence_set_summary$new(sequence_set = self))
     },
 
@@ -51,10 +102,8 @@ sequence_set <- R6::R6Class(
 
   private = list(
     basecalled_folder = NULL,
+    parquet_pairs = 0
 
-    get_arrow = function() {
-      form_arrow(private$basecalled_folder$get_cache_dir())
-    }
   )
 
 )

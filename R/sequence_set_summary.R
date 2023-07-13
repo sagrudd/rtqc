@@ -50,6 +50,11 @@ sequence_set_summary <- R6::R6Class(
     },
 
 
+    get_sequence_set = function() {
+      return(private$sequence_set)
+    },
+
+
     touch = function() {
 
       delta <- FALSE

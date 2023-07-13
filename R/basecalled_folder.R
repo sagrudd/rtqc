@@ -60,10 +60,10 @@ basecalled_folder <- R6::R6Class(
       if (private$check_indexing()) {
         private$index_process <- callr::r_bg(
           function(x, y, z) rtqc::index_fastq_list(x, y, z),
-          args = list(file.path(private$seq_path, private$.file_list$files),
+          args = list(
+            file.path(private$seq_path, private$get_sequence_file_list()$files),
                       private$cache_dir,
                       threads)
-
         )
       }
     },
@@ -84,20 +84,47 @@ basecalled_folder <- R6::R6Class(
       return(private$check_indexing(echo = echo))
     },
 
+    #' @description
+    #' a public accessory method to check on what is happening with the
+    #' current `basecalled_folder`
+    status_str = function() {
+      return(private$check_indexing_str())
+    },
 
     get_cache_dir = function() {
       return(private$cache_dir)
     },
 
+    #' @description
+    #' check whether new sequences have become available within the dataset
     is_new_sequence_data = function() {
-      if (nrow(private$.file_list) < nrow(private$get_sequence_file_list())) {
+      initial_count <- private$file_count
+      private$get_sequence_file_list()
+      recount <- private$file_count
+      if (initial_count < recount) {
         return(TRUE)
       }
       return(FALSE)
     },
 
-    get_list = function() {
-      return(private$get_sequence_file_list())
+    #' @description
+    #' return a tibble containing information on the sequence files identified
+    #' within this `basecalled_folder` instance.
+    #'
+    #' @param qualified_path defines whether the tibble should return qualified
+    #' file paths in the output
+    get_sequence_file_info = function(qualified_path=FALSE) {
+      file_tibble <- private$get_sequence_file_list()
+      if (qualified_path) {
+        file_tibble$files <- file.path(private$seq_path, file_tibble$files)
+      }
+      return(file_tibble)
+    },
+
+    #' @description
+    #' return a vector of file paths that have been characterised
+    list_files = function() {
+      return(self$get_sequence_file_info(TRUE)$files)
     }
   ),
 
@@ -116,7 +143,8 @@ basecalled_folder <- R6::R6Class(
 
 
     get_sequence_file_list = function() {
-      file_list <- list.files(private$seq_path,
+
+      private$.file_list <- list.files(private$seq_path,
                               recursive = TRUE,
                               pattern = "fq$|fq.gz$|fastq$|fastq.gz$",
                               ignore.case = TRUE)
@@ -127,19 +155,18 @@ basecalled_folder <- R6::R6Class(
 
       filetib <- tryCatch(
         {
-          ffiles <- factor(rep("UNKNOWN", length(file_list)),
+
+          ffiles <- factor(rep("UNKNOWN", length(private$.file_list)),
                            levels = c("UNKNOWN", "FASTQ", "BAM", "SAM"))
           ffiles[
-            which(grepl("fq$|fq.gz$|fastq$|fastq.gz$", file_list,
+            which(grepl("fq$|fq.gz$|fastq$|fastq.gz$", private$.file_list,
                   ignore.case = TRUE))] <- "FASTQ"
-
           depths <- unlist(
-            lapply(file_list, function(x) {
+            lapply(private$.file_list, function(x) {
               length(unlist(strsplit(x, .Platform$file.sep)))
             }))
-          barcode_assignment <- rep("unbarcoded", length(file_list))
-
-          filetib <- tibble::tibble(files=file_list, barcode=barcode_assignment, types=ffiles, depths=depths)
+          barcode_assignment <- rep("unbarcoded", length(private$.file_list))
+          filetib <- tibble::tibble(files=private$.file_list, barcode=barcode_assignment, types=ffiles, depths=depths)
 
           ftypes <- length(unique(filetib$types))
 
@@ -156,7 +183,7 @@ basecalled_folder <- R6::R6Class(
               private$file_format <- unique(ffiles)
               private$file_count <- length(private$.file_list)
             } else if (udepth == 2) {
-              fframe <- do.call(rbind, strsplit(file_list,
+              fframe <- do.call(rbind, strsplit(private$.file_list,
                                                 .Platform$file.sep))
               filetib$barcode <- fframe[,1]
               if (is.null(private$.sample_sheet)) {
@@ -197,20 +224,31 @@ basecalled_folder <- R6::R6Class(
     #' result of a base calling analysis using either MinKNOW or Dorado. This
     #' method will support FASTQ, SAM and BAM file formats.
     sequence_scan = function() {
-      private$.file_list <- private$get_sequence_file_list()
+      private$get_sequence_file_list()
     },
 
     check_indexing = function(echo = FALSE) {
+      if (echo) {
+        cat(private$check_indexing_str())
+      }
       if (is.null(private$index_process)) {
-        if (echo) cat(paste("Indexing process is not running", "\n"))
         return(TRUE)
       } else if (private$index_process$is_alive()) {
-        if (echo) cat(paste("Indexing process is currently running", "\n"))
         return(FALSE)
       } else if (!private$index_process$is_alive()) {
-        if (echo) cat(paste("Indexing process has completed", "\n"))
         private$index_process <- NULL
         return(TRUE)
+      }
+    },
+
+    check_indexing_str = function() {
+      if (is.null(private$index_process)) {
+        return("Indexing process is not running")
+      } else if (private$index_process$is_alive()) {
+        return("Indexing process is currently running")
+      } else if (!private$index_process$is_alive()) {
+        private$index_process <- NULL
+        return("Indexing process has completed")
       }
     }
   )

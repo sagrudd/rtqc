@@ -32,25 +32,70 @@ bf <- basecalled_folder$new(dorado_fastq_path)
 print(bf)
 ```
 
-We can also process demultiplexed sequence collections
+All that the `basecalled_folder` class instantiation has performed is to 
+identify and validate that there are indeed sequence data that may have been
+prepared by an Oxford Nanopore Technologies basecalling software. One of the
+more useful next steps would be to question what these files actually are?
 
-```{r load_multiplexed}
-library(rtqc)
+The class `get_list()` function will report the sequence files observed and some
+of their metadata.
 
-dorado_fastq_path <- get_bundled_path("barcoded_pass")
-bf <- basecalled_folder$new(dorado_fastq_path)
-print(bf)
+```{r get_file_tibble}
+bf$get_sequence_file_info()
+
+# we can also get just the files with complete paths as a vector; lists are
+# good for slicing ...
+bf$list_files()
 ```
 
+
+The objective here is not to just identify files; but to parse salient
+information from them. The `basecalled_folder` class provides method to index
+these sequence files.
 
 ```{r parse_fastq}
-
-dorado_fastq_path <- get_bundled_path("fastq_pass")
-single_fastq <- file.path(
-  dorado_fastq_path, list.files(dorado_fastq_path)[1])
-
-rtqc::index_fastq(single_fastq, tempdir())
-
-bf <- basecalled_folder$new(dorado_fastq_path)
-bf$index()
+single_fastq <- bf$list_files()[1]
+index_tuple <- rtqc::index_fastq(single_fastq, tempdir())
+#indexing returns a pair vector of original file and parquet index
+print(index_tuple[2])
 ```
+
+There's not much point in the indexing of the file if we can't read the file
+contents; the parquet files prepared can be simply opened with e.g.
+
+```{r open_parquet}
+sequencing_summary <- arrow::read_parquet(index_tuple[2])
+print(sequencing_summary)
+```
+
+These metrics read from the `parquet` file summary are used by other methods
+such as those presented through `sequence_set` R6 class. This vignette is
+intended to describe just the basics of handling folders of sequence
+information. 
+
+What is salient to mention here is that processing sequence files one at the
+time is a little silly; analyses should be performed in bulk and ideally as a
+non-blocking background process. This should be achieved using the methods
+provided - the `index` method provided will facilitate indexing of multiple
+sequence files in a background process - the `status` and `is_new_sequence_data`
+methods provide additional methods for checking whether the indexing is ongoing
+and whether new sequence files have become available within the sequencing
+folder (e.g. during live basecalling).
+
+```{r bulk_process}
+bf$index(threads=3)
+bf$status(echo=TRUE)
+
+bf$is_new_sequence_data()
+```
+
+The exploration of the sequence dataset can be achieved using the R6 class,
+`sequence_set`. A helpful constructor is provided within our `basecalled_folder`
+
+```{r create_sequence_set}
+sequence_set <- bf$as_sequence_set()
+print(sequence_set)
+```
+
+For further information please read the next vignette in this package's series.
+

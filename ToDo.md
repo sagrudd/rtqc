@@ -26,6 +26,7 @@
   [ ] presentation of QC plots
   [ ] Inclusion of calculated metrics in the rtqc tibble
       [x] Parsing quality information from the FASTQ & inclusion in parquet data
+      [ ] handle dates as appropriate object rather than str
   [ ] Implementation of dynamic filters to update view of sequence_set
       [ ] Filter by min-length / max-length
       [ ] Filter by min-quality / max-quality

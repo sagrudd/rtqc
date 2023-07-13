@@ -38,5 +38,9 @@ get_qscore <- function(qualstr) .Call(wrap__get_qscore, qualstr)
 #' @export
 get_mean_qscore <- function(phred_scores) .Call(wrap__get_mean_qscore, phred_scores)
 
+#' get the information on what has already been parsed within the working folder
+#' @export
+get_indexed_tuples <- function(dir) .Call(wrap__get_indexed_tuples, dir)
+
 
 # nolint end
