@@ -69,24 +69,24 @@ sequence_set <- R6::R6Class(
     sync = function() {
       # return(private$get_arrow())
       initial <- private$parquet_pairs
-      current <- nrow(self$get_parquet_pairs())
-      if (current > initial) {
-        private$parquet_pairs <- current
+      current_parquet <- self$get_parquet_pairs()
+      if (nrow(current_parquet) > initial) {
+        private$parquet_pairs <- nrow(current_parquet)
+        parquet <- current_parquet$parquet
+
+        if (is.null(private$data)) {
+          private$.data <- dplyr::bind_rows(lapply(parquet, arrow::read_parquet))
+          private$indexed_parquet <- parquet
+        } else {
+          # extract the new parquet pairs
+          new_parquet <- setdiff(private$indexed_parquet, parquet)
+          new_content <- dplyr::bind_rows(lapply(new_parquet, arrow::read_parquet))
+          private$.data <- dplyr::bind_rows(private$.data, new_content)
+          private$indexed_parquet <- append(private$indexed_parquet, new_parquet)
+        }
         return(TRUE)
       }
       return(FALSE)
-    },
-
-    #' @description
-    #' get the arrow data from the aggregate parquet file
-    data = function() {
-      self$wait_until_data()
-
-      parquet <- self$get_parquet_pairs()$parquet
-
-      #return(arrow::read_parquet(
-      #  get_arrow_path(private$basecalled_folder$get_cache_dir())))
-      return(dplyr::bind_rows(lapply(parquet, arrow::read_parquet)))
     },
 
     as_summary = function() {
@@ -100,9 +100,20 @@ sequence_set <- R6::R6Class(
 
   ),
 
+  active = list(
+    data = function(value) {
+      if (missing(value)) {
+        self$sync()
+        return(private$.data)
+      }
+    }
+  ),
+
   private = list(
     basecalled_folder = NULL,
-    parquet_pairs = 0
+    parquet_pairs = 0,
+    .data = NULL,
+    indexed_parquet = NULL
 
   )
 

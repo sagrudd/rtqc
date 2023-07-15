@@ -1,0 +1,42 @@
+---
+title: "The sequence_set_summary R6 class"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Preamble
+
+The `sequence_set_summary` is an object that presents sequence characteristics
+that have been aggregated in a `sequence_set`. This R6 class contains the
+methods that extract value from the data.frames that are encapsulated within
+the `sequence_set` but which cannot be processed or interrogated.
+
+## Getting started with the canned dataset
+
+The `rtqc` package is distributed with some simplified data. In the first 
+vignettes from the series accompanying this package, we prepared a 
+`sequence_set` from a `basecalled_folder`. Whilst we can sequentially prepare
+such a `sequence_set_summary` - the class also provides a simplified 
+fast-forward constructor to streamline this process.
+
+```{r load_rtqc}
+library(rtqc)
+
+dorado_fastq_path <- get_bundled_path("fastq_pass")
+seq_summary <- sequence_set_summary$new(dorado_fastq_path, threads=2)
+print(seq_summary)
+
+print(seq_summary$get_sequence_set()$data)
+```
+

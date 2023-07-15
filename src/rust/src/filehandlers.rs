@@ -26,23 +26,6 @@ pub fn load_fq_index_pairs(dir: &str) -> HashMap<String, String> {
     return fastq_pairs;
 }
 
-pub fn register_parquet_merge(dir: &str, src: &str) {
-    let parquet_log = Path::new(dir).join(crate::arrow::ARROW_PARQUET_LOG);
-    let str = format!("{}\n", src);
-    file_append(parquet_log, str.as_bytes());
-}
-
-pub fn load_parquet_registrations(dir: &str) -> Vec<String> {
-    let parquet_log = Path::new(dir).join(crate::arrow::ARROW_PARQUET_LOG);
-    let mut vec = Vec::new();
-
-    let buffer = read_file_content(parquet_log);
-    for line in buffer.lines() {
-        vec.push(String::from(line));
-    }
-    return vec;
-}
-
 fn file_append(file_path: PathBuf, payload: &[u8]) {
     let should_we_block  = true;
     let options = FileOptions::new()

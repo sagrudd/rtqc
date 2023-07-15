@@ -52,8 +52,31 @@ print(my_sequence_set)
 my_sequence_set$get_parquet_pairs()
 ```
 
-The final facet of this object is that we can extract the aggregate data
+The final facet of this object is that we can extract the aggregate data. This
+will load the sequence characteristics from the bundled `.parquet` files - the
+files are not loaded into a monolith in the current version of the code; if you
+look into the project's older branches there was some dubious rust code to
+perform file aggregation.
 
 ```{r getdata}
-my_sequence_set$data()
+my_sequence_set$get_data()
+```
+
+Of course, if we have gotten this far with an analysis, then there is a chance
+that some additional files will have been indexed. This can be checked with
+the `sync()` method that will return `TRUE` only if there are new sequence
+elements that might be considered.
+
+```{r sync}
+my_sequence_set$sync()
+```
+
+A collection of sequence data characteristics alone is a rather nebulous 
+capability. It is more interesting to present these characteristics in a tabular
+in graphical form. This is better achieved using the `sequence_set_summary`
+class. This can be prepared with
+
+```{r sequence_set_summary}
+summary <- my_sequence_set$as_summary()
+print(summary)
 ```

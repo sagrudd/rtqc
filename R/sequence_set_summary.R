@@ -29,24 +29,33 @@ sequence_set_summary <- R6::R6Class(
       }
     },
 
+    #' @description
+    #' this print method overrides the standard print function as included with
+    #' R6 objects - this is to better define what is contained within the object
+    #' and to provide better `rtqc` abstraction
+    #'
+    #' @param ... additional stuff passed on
+    #'
+    #' @return nothing (at present) - output to stdout
+    print = function(...) {
+      cat(paste0("<rtqc::", class(self)[1], ">\n",
+                 "\tflowcell_id=", self$flowcell_id, "\n",
+                 "\tbasecalling_model=", self$basecall_model, "\n",
+                 "\tsequence_files=", self$sequence_file_count, "\n",
+                 "\tsequence_count=", self$read_count, "\n",
+                 "\tsequence_bases=", self$read_bases()$str, "\n"))
+    },
+
 
     shiny_touch = function() {
+      private$poke_parquet()
       result <- list()
-
-      delta <- private$poke_parquet()
-
-      if (delta || is.null(private$data)) {
-        private$data <- private$sequence_set$data()
-
-        result$files <- length(unique(private$data$file_of_origin))
-        result$reads <- self$read_count()
+        result$files <- self$sequence_file_count
+        result$reads <- self$read_count
         result$bases <- self$read_bases()
-        result$length <- sprintf(mean(private$data$read), fmt = "%#.1f")
-        result$quality <- sprintf(get_mean_qscore(private$data$quality), fmt = "%#.2f")
+        result$length <- sprintf(self$mean_sequence_length, fmt = "%#.1f")
+        result$quality <- sprintf(self$mean_quality_score, fmt = "%#.2f")
         return(result)
-      }
-
-      NULL
     },
 
 
@@ -55,34 +64,7 @@ sequence_set_summary <- R6::R6Class(
     },
 
 
-    touch = function() {
 
-      delta <- FALSE
-
-      # are we up-to-date? Check first whether there are new files available
-      if (private$sequence_set$get_bc_folder()$is_new_sequence_data()) {
-        cat(paste0("sequence collection has new content", "\n"))
-      }
-
-
-
-      while (private$sequence_set$get_bc_folder()$status() == FALSE) {
-        cat(paste0("sequence collection is being indexed - waiting", "\n"))
-        Sys.sleep(0.5)
-      }
-
-      delta <- private$poke_parquet()
-
-      if (delta || is.null(private$data)) {
-        cat(paste0("reloading the stored data object", "\n"))
-        private$data <- private$sequence_set$data()
-      }
-
-    },
-
-    get_data = function() {
-      return(private$data)
-    },
 
 
     #' @description
@@ -103,11 +85,7 @@ sequence_set_summary <- R6::R6Class(
       i <- 1
     },
 
-    #' @description
-    #' returns the number of sequence reads that are defined within the object
-    read_count = function() {
-      nrow(private$data)
-    },
+
 
     #' @description
     #' returns a numeric defining the number of bases observed
@@ -116,7 +94,7 @@ sequence_set_summary <- R6::R6Class(
     #' can be Mb, Gb, Tb (at this moment) - or (auto) that will select an
     #' appropriate scale
     read_bases = function(scale="Gb", dpoints=2) {
-      bases <- sum(private$data$read)
+      bases <- sum(private$sequence_set$data$read)
       if (toupper(scale) == "KB") {
         bases <- bases / 1000
       } else if (toupper(scale) == "MB") {
@@ -169,10 +147,51 @@ sequence_set_summary <- R6::R6Class(
 
   ),
 
+  active = list(
+    #' @description
+    #' returns the number of sequence reads that are defined within the object
+    read_count = function(value) {
+      if (missing(value)) {
+        return(nrow(private$sequence_set$data))
+      }
+    },
+
+    flowcell_id = function(value) {
+      if (missing(value)) {
+        return(paste(unique(private$sequence_set$data$flow_cell_id), collapse=", "))
+      }
+    },
+
+    basecall_model = function(value) {
+      if (missing(value)) {
+        return(paste(unique(private$sequence_set$data$basecall_model_version_id), collapse=", "))
+      }
+    },
+
+    sequence_file_count = function(value) {
+      if (missing(value)) {
+        return(length(unique(private$sequence_set$data$file_of_origin)))
+      }
+    },
+
+    mean_sequence_length = function(value) {
+      if (missing(value)) {
+        return(mean(private$sequence_set$data$read))
+      }
+    },
+
+    mean_quality_score = function(value) {
+      if (missing(value)) {
+        return(get_mean_qscore(private$sequence_set$data$quality))
+      }
+    }
+
+
+  ),
+
   private = list(
     ping = 1,
     sequence_set = NULL,
-    data = NULL,
 
     poke_parquet = function() {
       if (private$sequence_set$sync()) {

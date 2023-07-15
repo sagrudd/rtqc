@@ -3,7 +3,6 @@ use extendr_api::prelude::*;
 mod fastq;
 mod fq_threaded;
 mod filehandlers;
-mod arrow;
 
 /// perform an index of fastq entry metadata
 /// @export
